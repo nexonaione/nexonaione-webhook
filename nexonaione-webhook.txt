@@ -1,0 +1,26 @@
+const express = require('express');
+const axios = require('axios');
+const app = express();
+
+app.use(express.json());
+
+app.post('/appointment-webhook', async (req, res) => {
+  try {
+    const leadData = req.body;
+
+    // Forward to Zoho CRM
+    await axios.post(
+      'https://crm.zoho.com/crm/WebhookServlet?authtoken=YOUR_ZOHO_TOKEN&module=Leads',
+      leadData
+    );
+
+    console.log('Lead forwarded to Zoho:', leadData);
+    res.status(200).send('Webhook received and forwarded');
+  } catch (error) {
+    console.error('Error forwarding lead:', error);
+    res.status(500).send('Error processing webhook');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Webhook running on port ${PORT}`));
